@@ -30,9 +30,9 @@ class AuthenticatedSessionController extends Controller
         }
 
         return match($user->role) {
-            'admin'     => redirect()->route('admin.dashboard'),
-            'moderator' => redirect()->route('moderator.dashboard'),
-            default     => redirect()->route('orders.index'),
+            'admin'     => redirect()->route('admin.dashboard')->with('success', 'Добро пожаловать, ' . $user->name . '!'),
+            'moderator' => redirect()->route('moderator.dashboard')->with('success', 'Добро пожаловать, ' . $user->name . '!'),
+            default     => redirect()->route('orders.index')->with('success', 'Добро пожаловать, ' . $user->name . '!'),
         };
     }
 

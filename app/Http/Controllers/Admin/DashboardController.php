@@ -18,18 +18,18 @@ class DashboardController extends Controller
     public function index()
     {
         $stats = [
-            'users_total'       => User::count(),
-            'users_freelancer'  => User::where('role', 'freelancer')->count(),
-            'users_client'      => User::where('role', 'client')->count(),
-            'orders_published'  => Order::where('status', 'published')->count(),
-            'orders_moderation' => Order::where('status', 'on_moderation')->count(),
-            'orders_in_progress'=> Order::where('status', 'in_progress')->count(),
-            'orders_completed'  => Order::where('status', 'completed')->count(),
-            'applications_total'=> OrderApplication::count(),
-            'external_total'    => ExternalOrder::count(),
-            'external_new'      => ExternalOrder::where('status', 'new')->count(),
-            'crawler_errors'    => CrawlerLog::sum('errors'),
-            'sources_active'    => CrawlerSource::where('status', 'active')->count(),
+            'users_total'        => User::count(),
+            'users_freelancer'   => User::where('role', 'freelancer')->count(),
+            'users_client'       => User::where('role', 'client')->count(),
+            'orders_published'   => Order::where('status', 'published')->count(),
+            'orders_moderation'  => Order::where('status', 'on_moderation')->count(),
+            'orders_in_progress' => Order::where('status', 'in_progress')->count(),
+            'orders_completed'   => Order::where('status', 'completed')->count(),
+            'applications_total' => OrderApplication::count(),
+            'external_total'     => ExternalOrder::count(),
+            'external_new'       => ExternalOrder::where('status', 'new')->count(),
+            'crawler_errors'     => CrawlerLog::sum('errors'),
+            'sources_active'     => CrawlerSource::where('status', 'active')->count(),
         ];
 
         $popularCategories = Order::select('category_id', DB::raw('count(*) as total'))
@@ -128,7 +128,6 @@ class DashboardController extends Controller
     private function exportCsv(array $rows, string $filename)
     {
         $handle = fopen('php://temp', 'r+');
-        // BOM for Excel UTF-8
         fputs($handle, "\xEF\xBB\xBF");
         foreach ($rows as $row) {
             fputcsv($handle, $row, ';');
@@ -145,7 +144,6 @@ class DashboardController extends Controller
 
     private function exportXlsx(array $rows, string $filename)
     {
-        // Uses PhpSpreadsheet
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         $sheet       = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Отчёт');
@@ -156,10 +154,7 @@ class DashboardController extends Controller
             }
         }
 
-        // Bold header
         $sheet->getStyle('A1:H1')->getFont()->setBold(true);
-
-        // Auto width
         foreach (range('A', 'H') as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
