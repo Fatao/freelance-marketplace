@@ -90,7 +90,8 @@ class OrderController extends Controller
     {
         $categories = Category::where('is_active', true)->get();
         $skills     = Skill::orderBy('name')->get();
-        return view('orders.create', compact('categories', 'skills'));
+        $order      = new Order();
+        return view('orders.create', compact('categories', 'skills', 'order'));
     }
 
     public function store(Request $request)

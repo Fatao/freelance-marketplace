@@ -62,7 +62,7 @@
                 <div class="form-check">
                     <input type="checkbox" name="skills[]" value="{{ $skill->id }}"
                            class="form-check-input" id="skill_{{ $skill->id }}"
-                           {{ in_array($skill->id, old('skills', $order->skills->pluck('id')->toArray() ?? [])) ? 'checked' : '' }}>
+                           {{ in_array($skill->id, old('skills', $order->id ? $order->skills->pluck('id')->toArray() : [])) ? 'checked' : '' }}>
                     <label class="form-check-label small" for="skill_{{ $skill->id }}">{{ $skill->name }}</label>
                 </div>
             </div>
