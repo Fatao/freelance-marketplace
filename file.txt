@@ -1,0 +1,11 @@
+| Role              | Email                                       | Password |
+| ----------  | --------------------------------------------- | -------- |
+| Admin      |admin@marketplace.ru             password 
+
+| Moderator  | moderator@marketplace.ru  | password |
+
+| Client     | client@marketplace.ru      | password |
+
+| Freelancer | freelancer@marketplace.ru | password |
+
+| Designer   | designer@marketplace.ru   | password |
