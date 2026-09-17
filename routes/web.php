@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ApplicationController;
@@ -23,11 +24,17 @@ use Illuminate\Support\Facades\Route;
 // ─── PUBLIC ───────────────────────────────────────────────────────────────────
 
 Route::get('/', fn() => view('welcome'))->name('home');
+Route::redirect('/home', '/');
 Route::get('/', [OrderController::class, 'index'])->name('home');
 Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
 Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show')->where('order', '[0-9]+');
 Route::get('/external-orders', [ExternalOrderController::class, 'index'])->name('external.index');
 Route::get('/external-orders/{externalOrder}', [ExternalOrderController::class, 'show'])->name('external.show')->where('externalOrder', '[0-9]+');
+Route::get('/search', [SearchController::class, 'index'])->name('search.index');
+
+
+
+
 
 // ─── AUTH (Breeze) ────────────────────────────────────────────────────────────
 require __DIR__.'/auth.php';

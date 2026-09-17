@@ -2,6 +2,23 @@
 
 @section('title', 'Администратор')
 
+@push('css')
+<style>
+    /* Hide broken logo image */
+    .brand-image,
+    .brand-image-xl,
+    img.brand-image {
+        display: none !important;
+    }
+    /* Style the text logo */
+    .brand-link .brand-text {
+        font-size: 1.05rem;
+        font-weight: 700;
+        letter-spacing: -0.3px;
+    }
+</style>
+@endpush
+
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
         <h4 class="mb-0">@yield('page_title', 'Панель администратора')</h4>
@@ -32,10 +49,3 @@
 
     @yield('admin_content')
 @endsection
-
-@push('css')
-    <style>
-        .card-header { font-weight: 600; }
-        .table td { vertical-align: middle; }
-    </style>
-@endpush

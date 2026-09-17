@@ -1,4 +1,3 @@
-
 <?php
 
 namespace App\Http\Controllers\Moderator;
@@ -49,7 +48,8 @@ class OrderController extends Controller
 
         app(NotificationService::class)->notifyMatchingSavedSearches($order->id);
 
-        return redirect()->route('moderator.orders.index')->with('success', 'Заказ опубликован.');
+        return redirect()->route('moderator.orders.index')
+            ->with('success', 'Заказ опубликован.');
     }
 
     public function reject(Request $request, Order $order)
@@ -73,7 +73,8 @@ class OrderController extends Controller
             ['order_id' => $order->id]
         );
 
-        return redirect()->route('moderator.orders.index')->with('success', 'Заказ отклонён.');
+        return redirect()->route('moderator.orders.index')
+            ->with('success', 'Заказ отклонён.');
     }
 
     public function revise(Request $request, Order $order)
@@ -97,6 +98,7 @@ class OrderController extends Controller
             ['order_id' => $order->id]
         );
 
-        return redirect()->route('moderator.orders.index')->with('success', 'Отправлен на доработку.');
+        return redirect()->route('moderator.orders.index')
+            ->with('success', 'Отправлен на доработку.');
     }
 }

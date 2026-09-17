@@ -63,15 +63,22 @@ class DashboardController extends Controller
         $data = [
             'orders_published'   => Order::where('status', 'published')
                 ->whereBetween('published_at', [$from, $to])->count(),
+
             'orders_completed'   => Order::where('status', 'completed')
                 ->whereBetween('updated_at', [$from, $to])->count(),
+
             'orders_moderation'  => Order::where('status', 'on_moderation')
                 ->whereBetween('created_at', [$from, $to])->count(),
+
             'orders_in_progress' => Order::where('status', 'in_progress')
                 ->whereBetween('updated_at', [$from, $to])->count(),
+
             'applications'       => OrderApplication::whereBetween('created_at', [$from, $to])->count(),
+
             'external_found'     => ExternalOrder::whereBetween('discovered_at', [$from, $to])->count(),
+
             'crawler_errors'     => CrawlerLog::whereBetween('started_at', [$from, $to])->sum('errors'),
+
             'new_users'          => User::whereBetween('created_at', [$from, $to])->count(),
         ];
 
@@ -128,12 +135,17 @@ class DashboardController extends Controller
     private function exportCsv(array $rows, string $filename)
     {
         $handle = fopen('php://temp', 'r+');
+
         fputs($handle, "\xEF\xBB\xBF");
+
         foreach ($rows as $row) {
             fputcsv($handle, $row, ';');
         }
+
         rewind($handle);
+
         $content = stream_get_contents($handle);
+
         fclose($handle);
 
         return response($content, 200, [
@@ -149,14 +161,19 @@ class DashboardController extends Controller
         $sheet->setTitle('Отчёт');
 
         foreach ($rows as $rowIndex => $row) {
+            $rowNum = $rowIndex + 1;
+
             foreach ($row as $colIndex => $value) {
-                $sheet->setCellValueByColumnAndRow($colIndex + 1, $rowIndex + 1, $value);
+                $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex + 1);
+                $sheet->setCellValue($colLetter . $rowNum, $value);
             }
         }
 
         $sheet->getStyle('A1:H1')->getFont()->setBold(true);
-        foreach (range('A', 'H') as $col) {
-            $sheet->getColumnDimension($col)->setAutoSize(true);
+
+        foreach (range(1, 8) as $col) {
+            $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col);
+            $sheet->getColumnDimension($colLetter)->setAutoSize(true);
         }
 
         $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);

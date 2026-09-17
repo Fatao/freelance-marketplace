@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Models\CrawlerSource;
 use App\Models\CrawlerLog;
 use App\Models\ExternalOrder;
-use App\Models\Category;
+use App\Services\NotificationService;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\DomCrawler\Crawler;
@@ -22,13 +22,12 @@ class CrawlerService
     public function run(CrawlerSource $source, ?int $startedBy, string $trigger): CrawlerLog
     {
         $this->reset();
-        $startedAt = now();
 
         $log = CrawlerLog::create([
             'crawler_source_id' => $source->id,
             'started_by'        => $startedBy,
             'trigger'           => $trigger,
-            'started_at'        => $startedAt,
+            'started_at'        => now(),
             'found'             => 0,
             'created'           => 0,
             'updated'           => 0,
@@ -41,18 +40,18 @@ class CrawlerService
         } catch (\Exception $e) {
             $this->errors++;
             $this->errorDetails[] = 'Критическая ошибка: ' . $e->getMessage();
-            Log::error("CrawlerService: {$source->name} — " . $e->getMessage());
+            Log::error("CrawlerService [{$source->name}]: " . $e->getMessage());
             $source->update(['status' => 'error']);
         }
 
         $log->update([
-            'found'        => $this->found,
-            'created'      => $this->created,
-            'updated'      => $this->updated,
-            'archived'     => $this->archived,
-            'errors'       => $this->errors,
-            'error_details'=> implode("\n", $this->errorDetails),
-            'finished_at'  => now(),
+            'found'         => $this->found,
+            'created'       => $this->created,
+            'updated'       => $this->updated,
+            'archived'      => $this->archived,
+            'errors'        => $this->errors,
+            'error_details' => implode("\n", $this->errorDetails),
+            'finished_at'   => now(),
         ]);
 
         $source->update(['last_run_at' => now()]);
@@ -62,34 +61,42 @@ class CrawlerService
 
     private function crawl(CrawlerSource $source): void
     {
-        $crawlRules   = $source->crawl_rules;
-        $extractRules = $source->extract_rules;
+        $crawlRules = is_array($source->crawl_rules)
+            ? $source->crawl_rules
+            : (json_decode($source->crawl_rules, true) ?? []);
+
+        $extractRules = is_array($source->extract_rules)
+            ? $source->extract_rules
+            : (json_decode($source->extract_rules, true) ?? []);
 
         $pages = $this->getPages($source->base_url, $crawlRules);
 
         foreach ($pages as $pageUrl) {
             try {
                 $html = $this->fetchPage($pageUrl);
-                if (!$html) continue;
+                if (!$html) {
+                    continue;
+                }
 
-                $dom   = new Crawler($html);
-                $items = $dom->filter($crawlRules['item_selector'] ?? 'article');
+                $dom      = new Crawler($html);
+                $selector = $crawlRules['item_selector'] ?? 'article';
+                $items    = $dom->filter($selector);
 
                 $items->each(function (Crawler $item) use ($source, $extractRules, $pageUrl) {
                     try {
                         $data = $this->extractData($item, $extractRules, $source->base_url);
-                        if (!$data || empty($data['title']) || empty($data['source_url'])) return;
-
+                        if (!$data || empty($data['title']) || empty($data['source_url'])) {
+                            return;
+                        }
                         $this->found++;
                         $this->saveOrder($source, $data);
                     } catch (\Exception $e) {
                         $this->errors++;
-                        $this->errorDetails[] = "Ошибка извлечения: " . $e->getMessage();
+                        $this->errorDetails[] = 'Ошибка извлечения: ' . $e->getMessage();
                     }
                 });
 
-                // Rate limiting — be polite to external sites
-                usleep(500000); // 0.5s between pages
+                usleep(500000);
 
             } catch (\Exception $e) {
                 $this->errors++;
@@ -97,19 +104,22 @@ class CrawlerService
             }
         }
 
-        // Archive orders that are no longer found
         $this->archiveMissing($source);
     }
 
     private function getPages(string $baseUrl, array $rules): array
     {
-        $pages   = [$baseUrl];
+        $pages    = [$baseUrl];
         $maxPages = $rules['max_pages'] ?? 1;
 
-        if ($maxPages <= 1) return $pages;
+        if ($maxPages <= 1) {
+            return $pages;
+        }
 
         $pattern = $rules['pagination_pattern'] ?? null;
-        if (!$pattern) return $pages;
+        if (!$pattern) {
+            return $pages;
+        }
 
         for ($i = 2; $i <= $maxPages; $i++) {
             $pages[] = str_replace('{page}', $i, $pattern);
@@ -124,14 +134,18 @@ class CrawlerService
             $response = Http::withHeaders([
                 'User-Agent' => 'Mozilla/5.0 (compatible; FreelanceMarketBot/1.0)',
                 'Accept'     => 'text/html,application/xhtml+xml',
-            ])->timeout(15)->get($url);
+            ])
+            ->withoutVerifying()  // skip ssl cert check
+            ->timeout(15)
+            ->get($url);
 
             if ($response->successful()) {
                 return $response->body();
             }
         } catch (\Exception $e) {
-            Log::warning("Crawler fetch failed: {$url} — " . $e->getMessage());
+            Log::warning("Crawler fetch failed [{$url}]: " . $e->getMessage());
         }
+
         return null;
     }
 
@@ -140,7 +154,9 @@ class CrawlerService
         $get = function (string $selector, string $attr = 'text') use ($item): ?string {
             try {
                 $node = $item->filter($selector);
-                if (!$node->count()) return null;
+                if (!$node->count()) {
+                    return null;
+                }
                 return $attr === 'text'
                     ? trim($node->first()->text())
                     : trim($node->first()->attr($attr));
@@ -168,7 +184,9 @@ class CrawlerService
 
     private function extractSkills(?string $raw): array
     {
-        if (!$raw) return [];
+        if (!$raw) {
+            return [];
+        }
         return array_values(array_filter(
             array_map('trim', explode(',', $raw))
         ));
@@ -202,7 +220,6 @@ class CrawlerService
             ]);
             $this->created++;
 
-            // Check saved searches
             app(NotificationService::class)
                 ->notifyMatchingSavedSearchesExternal(
                     $data['title'],
@@ -215,12 +232,12 @@ class CrawlerService
     {
         $threshold = now()->subHours(48);
 
-        $archived = ExternalOrder::where('crawler_source_id', $source->id)
+        $count = ExternalOrder::where('crawler_source_id', $source->id)
             ->where('status', 'active')
             ->where('last_updated_at', '<', $threshold)
             ->update(['status' => 'archived']);
 
-        $this->archived += $archived;
+        $this->archived += $count;
     }
 
     private function reset(): void
