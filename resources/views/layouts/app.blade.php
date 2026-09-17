@@ -355,7 +355,8 @@
         </div>
 
         <div class="text-white-50 small">
-            Developed and Designed by
+            Разработано и создано:
+
             <span class="text-white fw-semibold">FATAO</span>
             &amp;&amp;
             <span class="text-white fw-semibold">SAVA</span>
