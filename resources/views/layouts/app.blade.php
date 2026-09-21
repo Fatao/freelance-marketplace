@@ -347,7 +347,7 @@
                class="text-white-50 text-decoration-none small">
                 Поиск
             </a>
-
+ 
         </div>
 
         <div class="text-white-50 small mb-1">
