@@ -59,6 +59,113 @@ class CrawlerService
         return $log;
     }
 
+    public function runApi(CrawlerSource $source, ?int $startedBy, string $trigger): CrawlerLog
+    {
+        $this->reset();
+
+        $log = CrawlerLog::create([
+            'crawler_source_id' => $source->id,
+            'started_by'        => $startedBy,
+            'trigger'           => $trigger,
+            'started_at'        => now(),
+            'found'             => 0,
+            'created'           => 0,
+            'updated'           => 0,
+            'archived'          => 0,
+            'errors'            => 0,
+        ]);
+
+        try {
+            $extractRules = is_array($source->extract_rules)
+                ? $source->extract_rules
+                : (json_decode($source->extract_rules, true) ?? []);
+
+            $response = Http::withHeaders([
+                'User-Agent' => 'Mozilla/5.0 FreelanceMarketBot/1.0',
+                'Accept'     => 'application/json',
+            ])->withoutVerifying()->timeout(20)->get($source->base_url);
+
+            if (!$response->successful()) {
+                throw new \Exception("HTTP {$response->status()}");
+            }
+
+            $data  = $response->json();
+            $items = $extractRules['data_key'] ? data_get($data, $extractRules['data_key']) : $data;
+
+            if (!is_array($items)) {
+                throw new \Exception("Response is not an array");
+            }
+
+            if ($extractRules['skip_first'] ?? false) {
+                $items = array_slice($items, 1);
+            }
+
+            foreach ($items as $item) {
+                try {
+                    $title = data_get($item, $extractRules['title_key'] ?? 'title');
+                    $url   = data_get($item, $extractRules['url_key'] ?? 'url');
+
+                    if (empty($title) || empty($url)) {
+                        continue;
+                    }
+
+                    $this->found++;
+
+                    $existing = ExternalOrder::where('source_url', $url)->first();
+
+                    $payload = [
+                        'crawler_source_id' => $source->id,
+                        'title'             => $title,
+                        'description'       => strip_tags(data_get($item, $extractRules['description_key'] ?? 'description') ?? ''),
+                        'budget'            => null,
+                        'skills'            => array_values(array_filter(
+                            (array) data_get($item, $extractRules['skills_key'] ?? 'tags', [])
+                        )),
+                        'status'            => 'active',
+                        'last_updated_at'   => now(),
+                    ];
+
+                    if ($existing) {
+                        $existing->update($payload);
+                        $this->updated++;
+                    } else {
+                        ExternalOrder::create(array_merge($payload, [
+                            'source_url'    => $url,
+                            'discovered_at' => now(),
+                        ]));
+                        $this->created++;
+
+                        app(NotificationService::class)->notifyMatchingSavedSearchesExternal(
+                            $title,
+                            $payload['skills']
+                        );
+                    }
+                } catch (\Exception $e) {
+                    $this->errors++;
+                    $this->errorDetails[] = $e->getMessage();
+                }
+            }
+        } catch (\Exception $e) {
+            $this->errors++;
+            $this->errorDetails[] = $e->getMessage();
+            $source->update(['status' => 'error']);
+        }
+
+        $log->update([
+            'found'         => $this->found,
+            'created'       => $this->created,
+            'updated'       => $this->updated,
+            'archived'      => $this->archived,
+            'errors'        => $this->errors,
+            'error_details' => implode("\n", $this->errorDetails),
+            'finished_at'   => now(),
+        ]);
+
+        $source->update(['last_run_at' => now()]);
+
+        return $log;
+    }
+
     private function crawl(CrawlerSource $source): void
     {
         $crawlRules = is_array($source->crawl_rules)

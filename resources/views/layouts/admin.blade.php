@@ -4,17 +4,34 @@
 
 @push('css')
 <style>
-    /* Hide broken logo image */
     .brand-image,
     .brand-image-xl,
     img.brand-image {
         display: none !important;
     }
-    /* Style the text logo */
+
+    .brand-link {
+        font-size: 1.1rem !important;
+        font-weight: 700 !important;
+        color: #fff !important;
+        text-decoration: none !important;
+    }
+
+    .brand-link:hover {
+        color: #adb5bd !important;
+    }
+
     .brand-link .brand-text {
-        font-size: 1.05rem;
+        font-size: 1.1rem;
         font-weight: 700;
-        letter-spacing: -0.3px;
+    }
+
+    .brand-link b {
+        color: #4e9af1;
+    }
+
+    .navbar-dark {
+        background: #1a1a2e !important;
     }
 </style>
 @endpush

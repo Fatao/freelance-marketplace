@@ -6,6 +6,7 @@ return [
     'title_postfix'  => ' | ФрилансМаркет',
     'logo'           => '<i class="fas fa-briefcase mr-1"></i> <b>Фриланс</b>Маркет',
     'logo_img'       => false,
+    'logo_href' => '/',
     'logo_img_xl'    => false,
     'logo_img_class' => '',
     'logo_img_xl_class' => '',

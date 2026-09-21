@@ -15,12 +15,21 @@ class CrawlerController extends Controller
     public function run(CrawlerSource $source)
     {
         try {
-            $this->crawler->run($source, auth()->id(), 'manual');
+            $crawlRules = is_array($source->crawl_rules)
+                ? $source->crawl_rules
+                : (json_decode($source->crawl_rules, true) ?? []);
+
+            if (($crawlRules['mode'] ?? '') === 'api') {
+                $this->crawler->runApi($source, auth()->id(), 'manual');
+            } else {
+                $this->crawler->run($source, auth()->id(), 'manual');
+            }
+
             return redirect()->route('admin.crawler.logs')
                 ->with('success', "Краулер для «{$source->name}» запущен.");
         } catch (\Exception $e) {
             return redirect()->route('admin.crawler.logs')
-                ->with('error', 'Ошибка запуска: ' . $e->getMessage());
+                ->with('error', 'Ошибка: ' . $e->getMessage());
         }
     }
 
@@ -29,11 +38,20 @@ class CrawlerController extends Controller
         $sources = CrawlerSource::where('status', 'active')->get();
         foreach ($sources as $source) {
             try {
-                $this->crawler->run($source, auth()->id(), 'manual');
+                $crawlRules = is_array($source->crawl_rules)
+                    ? $source->crawl_rules
+                    : (json_decode($source->crawl_rules, true) ?? []);
+
+                if (($crawlRules['mode'] ?? '') === 'api') {
+                    $this->crawler->runApi($source, auth()->id(), 'manual');
+                } else {
+                    $this->crawler->run($source, auth()->id(), 'manual');
+                }
             } catch (\Exception $e) {
-                \Log::error("Crawler failed for {$source->name}: " . $e->getMessage());
+                \Log::error("Crawler failed [{$source->name}]: " . $e->getMessage());
             }
         }
+
         return redirect()->route('admin.crawler.logs')
             ->with('success', 'Все активные источники запущены.');
     }
