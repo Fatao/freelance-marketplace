@@ -117,6 +117,6 @@ class UserSeeder extends Seeder
         );
 
         $skills2 = Skill::whereIn('slug', ['figma', 'adobe-xd', 'wireframing', 'prototyping'])->get();
-        $fp2->skills()->attach($skills2->pluck('id'));
+        $fp2->skills()->syncWithoutDetaching($skills2->pluck('id'));
     }
 }
