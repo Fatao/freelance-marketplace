@@ -67,10 +67,16 @@ class CategorySeeder extends Seeder
             $children = $data['children'] ?? [];
             unset($data['children']);
 
-            $parent = Category::create($data);
+            $parent = Category::updateOrCreate(
+                ['slug' => $data['slug']],
+                $data
+            );
 
             foreach ($children as $child) {
-                Category::create(array_merge($child, ['parent_id' => $parent->id]));
+                Category::updateOrCreate(
+                    ['slug' => $child['slug']],
+                    array_merge($child, ['parent_id' => $parent->id])
+                );
             }
         }
     }
