@@ -22,7 +22,7 @@
             </div>
             <div class="card-body">
                 <p class="text-muted small mb-2">{{ Str::limit($order->description, 200) }}</p>
-                <small class="text-muted">Заказчик: <strong>{{ $order->client->name }}</strong></small>
+                <small class="text-muted">Заказчик: <strong>{{ $order->client?->name ?? 'Не указан' }}</strong></small>
             </div>
             <div class="card-footer d-flex gap-2">
                 <a href="{{ route('moderator.orders.show', $order) }}" class="btn btn-sm btn-outline-primary">
