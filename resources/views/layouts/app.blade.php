@@ -357,9 +357,15 @@
         <div class="text-white-50 small">
             Разработано и создано:
 
-            <span class="text-white fw-semibold">FATAO</span>
+            <a href="https://t.me/fatao_dev101" target="_blank" rel="noopener noreferrer"
+               class="text-primary fw-semibold text-decoration-underline text-decoration-underline-opacity-75">
+                FATAO
+            </a>
             &amp;&amp;
-            <span class="text-white fw-semibold">SAVA</span>
+            <a href="https://t.me/cabeluu" target="_blank" rel="noopener noreferrer"
+               class="text-primary fw-semibold text-decoration-underline text-decoration-underline-opacity-75">
+                SAVA
+            </a>
         </div>
 
     </div>

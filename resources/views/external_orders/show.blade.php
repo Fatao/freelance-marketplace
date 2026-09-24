@@ -9,7 +9,7 @@
                 <div>
                     <span class="badge bg-info me-2">Внешний заказ</span>
                     <span class="badge {{ $externalOrder->status === 'new' ? 'bg-success' : 'bg-secondary' }}">
-                        {{ ['new'=>'Новый','active'=>'Актуальный','archived'=>'Архив','error'=>'Ошибка'][$externalOrder->status] }}
+                        {{ ['new'=>'Новый','active'=>'Актуальный','archived'=>'Архив','error'=>'Ошибка'][$externalOrder->status] ?? $externalOrder->status }}
                     </span>
                 </div>
                 <a href="{{ route('external.index') }}" class="btn btn-sm btn-outline-secondary">
@@ -20,7 +20,7 @@
                 <h5 class="fw-bold mb-3">{{ $externalOrder->title }}</h5>
 
                 @if($externalOrder->description)
-                    <p class="text-muted">{{ $externalOrder->description }}</p>
+                    <p class="text-muted">{{ strip_tags($externalOrder->description) }}</p>
                 @endif
 
                 <hr>
@@ -28,7 +28,9 @@
                     <div class="col-sm-4">
                         <small class="text-muted d-block">Бюджет</small>
                         <span class="fw-semibold text-success">
-                            {{ $externalOrder->budget ? number_format($externalOrder->budget,0,'.',' ') . ' ₽' : 'Не указан' }}
+                            {{ $externalOrder->budget
+                                ? number_format($externalOrder->budget, 0, '.', ' ') . ' ₽'
+                                : 'Не указан' }}
                         </span>
                     </div>
                     <div class="col-sm-4">
@@ -37,11 +39,11 @@
                     </div>
                     <div class="col-sm-4">
                         <small class="text-muted d-block">Источник</small>
-                        <span>{{ $externalOrder->source?->name }}</span>
+                        <span>{{ $externalOrder->source?->name ?? '—' }}</span>
                     </div>
                 </div>
 
-                @if($externalOrder->skills && count($externalOrder->skills))
+                @if($externalOrder->skills && is_array($externalOrder->skills) && count($externalOrder->skills))
                     <div class="mt-3">
                         <small class="text-muted d-block mb-1">Навыки</small>
                         @foreach($externalOrder->skills as $skill)
@@ -51,8 +53,7 @@
                 @endif
 
                 <div class="mt-4">
-                    <a href="{{ $externalOrder->source_url }}" target="_blank"
-                       class="btn btn-primary">
+                    <a href="{{ $externalOrder->source_url }}" target="_blank" class="btn btn-primary">
                         <i class="bi bi-box-arrow-up-right me-2"></i>Перейти к оригинальному заказу
                     </a>
                 </div>
@@ -66,15 +67,15 @@
             <div class="card-body small">
                 <div class="d-flex justify-content-between py-2 border-bottom">
                     <span class="text-muted">Обнаружен</span>
-                    <span>{{ $externalOrder->discovered_at->format('d.m.Y H:i') }}</span>
+                    <span>{{ $externalOrder->discovered_at?->format('d.m.Y H:i') ?? '—' }}</span>
                 </div>
                 <div class="d-flex justify-content-between py-2 border-bottom">
                     <span class="text-muted">Обновлён</span>
                     <span>{{ $externalOrder->last_updated_at?->format('d.m.Y H:i') ?? '—' }}</span>
                 </div>
                 <div class="d-flex justify-content-between py-2">
-                    <span class="text-muted">Источник</span>
-                    <span>{{ $externalOrder->source?->name ?? '—' }}</span>
+                    <span class="text-muted">Статус</span>
+                    <span>{{ ['new'=>'Новый','active'=>'Актуальный','archived'=>'Архив'][$externalOrder->status] ?? $externalOrder->status }}</span>
                 </div>
             </div>
         </div>

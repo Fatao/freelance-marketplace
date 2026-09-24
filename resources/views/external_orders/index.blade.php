@@ -3,7 +3,6 @@
 @section('content')
 
 <div class="row g-4">
-    {{-- Filters --}}
     <div class="col-lg-3">
         <div class="card">
             <div class="card-header"><i class="bi bi-funnel me-1"></i>Фильтры</div>
@@ -19,7 +18,8 @@
                         <select name="source_id" class="form-select form-select-sm">
                             <option value="">Все источники</option>
                             @foreach($sources as $source)
-                                <option value="{{ $source->id }}" {{ request('source_id') == $source->id ? 'selected' : '' }}>
+                                <option value="{{ $source->id }}"
+                                    {{ request('source_id') == $source->id ? 'selected' : '' }}>
                                     {{ $source->name }}
                                 </option>
                             @endforeach
@@ -45,7 +45,6 @@
         </div>
     </div>
 
-    {{-- List --}}
     <div class="col-lg-9">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h5 class="mb-0">
@@ -54,7 +53,7 @@
             </h5>
             @auth
                 @if(auth()->user()->isFreelancer())
-                    <a href="{{ route('saved-searches.create', ['source' => 'external', 'keywords' => request('keywords')]) }}"
+                    <a href="{{ route('saved-searches.create', ['source' => 'external']) }}"
                        class="btn btn-sm btn-outline-primary">
                         <i class="bi bi-bookmark-plus me-1"></i>Сохранить поиск
                     </a>
@@ -74,9 +73,9 @@
                                 </a>
                             </h6>
                             <small class="text-muted">
-                                <i class="bi bi-globe2 me-1"></i>{{ $order->source?->name }}
+                                <i class="bi bi-globe2 me-1"></i>{{ $order->source?->name ?? '—' }}
                                 &nbsp;·&nbsp;
-                                <i class="bi bi-clock me-1"></i>{{ $order->discovered_at->diffForHumans() }}
+                                <i class="bi bi-clock me-1"></i>{{ $order->discovered_at?->diffForHumans() }}
                                 @if($order->status === 'new')
                                     &nbsp;·&nbsp;<span class="badge bg-success">Новый</span>
                                 @endif
@@ -95,18 +94,20 @@
 
                     @if($order->description)
                         <p class="text-muted small mt-2 mb-2">
-                            {{ Str::limit($order->description, 150) }}
+                            {{ Str::limit(strip_tags($order->description), 150) }}
                         </p>
                     @endif
 
                     <div class="d-flex justify-content-between align-items-center mt-2">
                         <div>
-                            @if($order->skills)
+                            @if($order->skills && is_array($order->skills))
                                 @foreach(array_slice($order->skills, 0, 4) as $skill)
                                     <span class="badge bg-light text-dark border me-1">{{ $skill }}</span>
                                 @endforeach
                                 @if(count($order->skills) > 4)
-                                    <span class="badge bg-light text-muted border">+{{ count($order->skills) - 4 }}</span>
+                                    <span class="badge bg-light text-muted border">
+                                        +{{ count($order->skills) - 4 }}
+                                    </span>
                                 @endif
                             @endif
                         </div>
