@@ -55,6 +55,18 @@
     </div>
 </div>
 
+@if($stats['pending_role_requests'] > 0)
+    <div class="alert alert-warning d-flex justify-content-between align-items-center">
+        <span>
+            <i class="fas fa-user-tag me-2"></i>
+            <strong>{{ $stats['pending_role_requests'] }}</strong> заявок на смену роли ожидают рассмотрения
+        </span>
+        <a href="{{ route('admin.role-requests.index') }}" class="btn btn-warning btn-sm">
+            Рассмотреть
+        </a>
+    </div>
+@endif
+
 <div class="row g-4">
 
     {{-- Recent orders --}}

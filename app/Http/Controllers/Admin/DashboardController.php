@@ -10,6 +10,7 @@ use App\Models\ExternalOrder;
 use App\Models\CrawlerLog;
 use App\Models\CrawlerSource;
 use App\Models\Category;
+use App\Models\RoleRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -30,6 +31,7 @@ class DashboardController extends Controller
             'external_new'       => ExternalOrder::where('status', 'new')->count(),
             'crawler_errors'     => CrawlerLog::sum('errors'),
             'sources_active'     => CrawlerSource::where('status', 'active')->count(),
+            'pending_role_requests' => RoleRequest::where('status', 'pending')->count(),
         ];
 
         $popularCategories = Order::select('category_id', DB::raw('count(*) as total'))

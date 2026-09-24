@@ -10,6 +10,7 @@ use App\Http\Controllers\SavedSearchController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ComplaintController;
 use App\Http\Controllers\ExternalOrderController;
+use App\Http\Controllers\RoleRequestController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
 use App\Http\Controllers\Admin\UserController as AdminUser;
 use App\Http\Controllers\Admin\CrawlerController as AdminCrawler;
@@ -63,6 +64,10 @@ Route::middleware(['auth', 'blocked'])->group(function () {
 
         // Saved searches
         Route::resource('saved-searches', SavedSearchController::class);
+
+        // Freelancer role request
+        Route::get('/request-client-role', [RoleRequestController::class, 'create'])->name('role-request.create');
+        Route::post('/request-client-role', [RoleRequestController::class, 'store'])->name('role-request.store');
     });
 
     // ── CLIENT ─────────────────────────────────────────────────────────────────
@@ -136,5 +141,10 @@ Route::middleware(['auth', 'blocked'])->group(function () {
         // Reports
         Route::get('/reports', [AdminDashboard::class, 'reports'])->name('reports');
         Route::get('/reports/export', [AdminDashboard::class, 'export'])->name('reports.export');
+
+        // Role requests management
+        Route::get('/role-requests', [\App\Http\Controllers\Admin\RoleRequestController::class, 'index'])->name('role-requests.index');
+        Route::patch('/role-requests/{roleRequest}/approve', [\App\Http\Controllers\Admin\RoleRequestController::class, 'approve'])->name('role-requests.approve');
+        Route::patch('/role-requests/{roleRequest}/reject', [\App\Http\Controllers\Admin\RoleRequestController::class, 'reject'])->name('role-requests.reject');
     });
 });

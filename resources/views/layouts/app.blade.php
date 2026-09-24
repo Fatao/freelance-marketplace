@@ -231,6 +231,15 @@
 
                             @endif
 
+                            @if(auth()->user()->isFreelancer())
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item text-primary" href="{{ route('role-request.create') }}">
+                                        <i class="bi bi-arrow-up-circle me-2"></i>Стать заказчиком
+                                    </a>
+                                </li>
+                            @endif
+
                             <li>
                                 <hr class="dropdown-divider">
                             </li>

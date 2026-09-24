@@ -45,6 +45,13 @@ return [
             'url'     => 'admin/skills',
             'icon'    => 'fas fa-code',
         ],
+        [
+            'text'  => 'Заявки на роль',
+            'url'   => 'admin/role-requests',
+            'icon'  => 'fas fa-user-tag',
+            'label' => 'pendingRoleRequests',
+            'label_color' => 'warning',
+        ],
         ['header' => 'КРАУЛЕР'],
         [
             'text'    => 'Источники',
