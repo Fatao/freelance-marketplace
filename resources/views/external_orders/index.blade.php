@@ -102,12 +102,14 @@
                         <div>
                             @if($order->skills && is_array($order->skills))
                                 @foreach(array_slice($order->skills, 0, 4) as $skill)
-                                    <span class="badge bg-light text-dark border me-1">{{ $skill }}</span>
+                                    @if(is_string($skill))
+                                        <span class="badge bg-light text-dark border me-1">{{ $skill }}</span>
+                                    @elseif(is_array($skill))
+                                        <span class="badge bg-light text-dark border me-1">{{ implode(', ', array_filter($skill, 'is_string')) }}</span>
+                                    @endif
                                 @endforeach
                                 @if(count($order->skills) > 4)
-                                    <span class="badge bg-light text-muted border">
-                                        +{{ count($order->skills) - 4 }}
-                                    </span>
+                                    <span class="badge bg-light text-muted border">+{{ count($order->skills) - 4 }}</span>
                                 @endif
                             @endif
                         </div>
