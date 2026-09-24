@@ -10,7 +10,7 @@ class ExternalOrderController extends Controller
 {
     public function index(Request $request)
     {
-        $query = ExternalOrder::with(['source', 'category'])
+        $query = ExternalOrder::with(['source'])
             ->whereIn('status', ['new', 'active'])
             ->orderByDesc('discovered_at');
 
@@ -33,15 +33,15 @@ class ExternalOrderController extends Controller
             $query->where('budget', '<=', $request->budget_max);
         }
 
-        $orders  = $query->paginate(15)->withQueryString();
-        $sources = CrawlerSource::where('status', 'active')->get();
+        $orders  = $query->paginate(20)->withQueryString();
+        $sources = CrawlerSource::where('status', 'active')->select('id', 'name')->get();
 
         return view('external_orders.index', compact('orders', 'sources'));
     }
 
     public function show(ExternalOrder $externalOrder)
     {
-        $externalOrder->load(['source', 'category']);
+        $externalOrder->load(['source']);
         return view('external_orders.show', compact('externalOrder'));
     }
 }

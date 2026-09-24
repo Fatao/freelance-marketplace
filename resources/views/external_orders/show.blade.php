@@ -73,8 +73,8 @@
                     <span>{{ $externalOrder->last_updated_at?->format('d.m.Y H:i') ?? '—' }}</span>
                 </div>
                 <div class="d-flex justify-content-between py-2">
-                    <span class="text-muted">Категория</span>
-                    <span>{{ $externalOrder->category?->name ?? '—' }}</span>
+                    <span class="text-muted">Источник</span>
+                    <span>{{ $externalOrder->source?->name ?? '—' }}</span>
                 </div>
             </div>
         </div>

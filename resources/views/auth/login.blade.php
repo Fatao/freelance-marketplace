@@ -28,9 +28,14 @@
                     <button type="submit" class="btn btn-primary w-100">Войти</button>
                 </form>
                 <hr>
-                <p class="text-center mb-0">
-                    Нет аккаунта? <a href="{{ route('register') }}">Зарегистрироваться</a>
-                </p>
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <a href="{{ route('password.request') }}" class="small text-decoration-none">
+                        Забыли пароль?
+                    </a>
+                    <span class="small text-muted">
+                        Нет аккаунта? <a href="{{ route('register') }}">Зарегистрироваться</a>
+                    </span>
+                </div>
             </div>
         </div>
     </div>
