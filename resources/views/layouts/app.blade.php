@@ -358,12 +358,12 @@
             Разработано и создано:
 
             <a href="https://t.me/fatao_dev101" target="_blank" rel="noopener noreferrer"
-               class="text-primary fw-semibold text-decoration-underline text-decoration-underline-opacity-75">
+               class="badge bg-primary text-white text-decoration-none ms-1 me-1 px-2 py-1 rounded-pill align-middle">
                 FATAO
             </a>
             &amp;&amp;
             <a href="https://t.me/cabeluu" target="_blank" rel="noopener noreferrer"
-               class="text-primary fw-semibold text-decoration-underline text-decoration-underline-opacity-75">
+               class="badge bg-primary text-white text-decoration-none ms-1 me-1 px-2 py-1 rounded-pill align-middle">
                 SAVA
             </a>
         </div>
